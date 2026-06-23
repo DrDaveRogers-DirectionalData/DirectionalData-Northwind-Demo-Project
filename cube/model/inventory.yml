@@ -3,20 +3,61 @@ cubes:
     sql_table: northwind.marts.fact_inventory_snapshot
     description: >
       Point-in-time product inventory snapshot. One row per product.
-      Used for COO inventory health metrics: out-of-stock counts,
-      below-reorder-level alerts, and total inventory value.
+      Used for COO inventory health metrics.
 
-    joins:
-      - name: inventory_products
-        sql: "{inventory}.product_key = {inventory_products}.product_key"
-        relationship: many_to_one
+    # ── Primary Key ───────────────────────────────────────────────────────────
 
-    # ── Measures ─────────────────────────────────────────────────────────────
+    dimensions:
+
+      - name: product_id
+        sql: product_id
+        type: number
+        primary_key: true
+        description: "Natural product key."
+
+      # ── Descriptive attributes ───────────────────────────────────────────
+
+      - name: product_name
+        sql: product_name
+        type: string
+
+      - name: units_in_stock
+        sql: units_in_stock
+        type: number
+
+      - name: units_on_order
+        sql: units_on_order
+        type: number
+
+      - name: reorder_level
+        sql: reorder_level
+        type: number
+
+      - name: inventory_value
+        sql: inventory_value
+        type: number
+
+      # ── Flags ────────────────────────────────────────────────────────────
+
+      - name: is_discontinued
+        sql: is_discontinued
+        type: boolean
+
+      - name: is_out_of_stock
+        sql: is_out_of_stock
+        type: boolean
+
+      - name: is_below_reorder_level
+        sql: is_below_reorder_level
+        type: boolean
+
+    # ── Measures ──────────────────────────────────────────────────────────────
 
     measures:
+
       - name: total_products
         type: count
-        description: "Total number of products in the catalog."
+        description: "Total number of products."
 
       - name: active_products
         sql: "CASE WHEN is_discontinued = false THEN product_id END"
@@ -52,12 +93,12 @@ cubes:
         sql: inventory_value
         type: sum
         format: currency
-        description: "Total value of on-hand inventory (units_in_stock x unit_price)."
+        description: "Total value of on-hand inventory."
 
       - name: avg_units_in_stock
         sql: units_in_stock
         type: avg
-        description: "Average units in stock across products."
+        description: "Average units in stock per product."
 
       - name: out_of_stock_rate
         type: number
@@ -66,70 +107,3 @@ cubes:
           / NULLIF(COUNT(DISTINCT CASE WHEN is_discontinued = false THEN product_id END), 0)
         format: percent
         description: "Percentage of active products currently out of stock."
-
-    # ── Dimensions ────────────────────────────────────────────────────────────
-
-    dimensions:
-      - name: product_id
-        sql: product_id
-        type: number
-        primary_key: true
-        description: "Natural product key."
-
-      - name: product_name
-        sql: product_name
-        type: string
-
-      - name: units_in_stock
-        sql: units_in_stock
-        type: number
-
-      - name: units_on_order
-        sql: units_on_order
-        type: number
-
-      - name: reorder_level
-        sql: reorder_level
-        type: number
-
-      - name: inventory_value
-        sql: inventory_value
-        type: number
-
-      - name: is_discontinued
-        sql: is_discontinued
-        type: boolean
-
-      - name: is_out_of_stock
-        sql: is_out_of_stock
-        type: boolean
-        description: "True if units_in_stock = 0 and not discontinued."
-
-      - name: is_below_reorder_level
-        sql: is_below_reorder_level
-        type: boolean
-        description: "True if units_in_stock <= reorder_level."
-
-  # ── Product Dimension (inventory context) ────────────────────────────────────
-
-  - name: inventory_products
-    sql_table: northwind.marts.dim_products
-    description: "Product dimension joined to inventory cube for category and supplier filtering."
-
-    dimensions:
-      - name: product_key
-        sql: product_key
-        type: string
-        primary_key: true
-
-      - name: category_name
-        sql: category_name
-        type: string
-
-      - name: supplier_name
-        sql: supplier_name
-        type: string
-
-      - name: supplier_country
-        sql: supplier_country
-        type: string

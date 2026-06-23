@@ -1,6 +1,7 @@
 cubes:
   - name: inventory
     sql_table: northwind.marts.fact_inventory_snapshot
+    title: Inventory
     description: >
       Point-in-time product inventory snapshot. One row per product.
       Used for COO inventory health metrics.
@@ -10,6 +11,7 @@ cubes:
     dimensions:
 
       - name: product_id
+        title: Product ID
         sql: product_id
         type: number
         primary_key: true
@@ -18,36 +20,44 @@ cubes:
       # ── Descriptive attributes ───────────────────────────────────────────
 
       - name: product_name
+        title: Product
         sql: product_name
         type: string
 
       - name: units_in_stock
+        title: Units in Stock
         sql: units_in_stock
         type: number
 
       - name: units_on_order
+        title: Units on Order
         sql: units_on_order
         type: number
 
       - name: reorder_level
+        title: Reorder Level
         sql: reorder_level
         type: number
 
       - name: inventory_value
+        title: Inventory Value
         sql: inventory_value
         type: number
 
       # ── Flags ────────────────────────────────────────────────────────────
 
       - name: is_discontinued
+        title: Discontinued?
         sql: is_discontinued
         type: boolean
 
       - name: is_out_of_stock
+        title: Out of Stock?
         sql: is_out_of_stock
         type: boolean
 
       - name: is_below_reorder_level
+        title: Below Reorder Level?
         sql: is_below_reorder_level
         type: boolean
 
@@ -56,51 +66,61 @@ cubes:
     measures:
 
       - name: total_products
+        title: Total Products
         type: count
         description: "Total number of products."
 
       - name: active_products
+        title: Active Products
         sql: "CASE WHEN is_discontinued = false THEN product_id END"
         type: count_distinct
         description: "Products that are not discontinued."
 
       - name: discontinued_products
+        title: Discontinued Products
         sql: "CASE WHEN is_discontinued = true THEN product_id END"
         type: count_distinct
         description: "Products marked as discontinued."
 
       - name: out_of_stock_count
+        title: Out of Stock Products
         sql: "CASE WHEN is_out_of_stock = true THEN product_id END"
         type: count_distinct
         description: "Active products with zero units in stock."
 
       - name: below_reorder_count
+        title: Below Reorder Level
         sql: "CASE WHEN is_below_reorder_level = true THEN product_id END"
         type: count_distinct
         description: "Products at or below their reorder threshold."
 
       - name: total_units_in_stock
+        title: Total Units in Stock
         sql: units_in_stock
         type: sum
         description: "Total units across all products currently in stock."
 
       - name: total_units_on_order
+        title: Total Units on Order
         sql: units_on_order
         type: sum
         description: "Total units currently on order from suppliers."
 
       - name: total_inventory_value
+        title: Total Inventory Value
         sql: inventory_value
         type: sum
         format: currency
         description: "Total value of on-hand inventory."
 
       - name: avg_units_in_stock
+        title: Avg Units in Stock
         sql: units_in_stock
         type: avg
         description: "Average units in stock per product."
 
       - name: out_of_stock_rate
+        title: Out of Stock Rate
         type: number
         sql: >
           100.0 * COUNT(DISTINCT CASE WHEN is_out_of_stock = true THEN product_id END)

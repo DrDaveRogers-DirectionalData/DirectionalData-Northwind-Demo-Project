@@ -1,6 +1,7 @@
 cubes:
   - name: orders
     sql_table: northwind.marts.fact_order_lines
+    title: Orders
     description: >
       One row per order line item. All dimensional attributes are already
       denormalized into this table, so no joins are needed. Covers all
@@ -11,6 +12,7 @@ cubes:
     dimensions:
 
       - name: order_line_key
+        title: Order Line Key
         sql: "CONCAT(CAST(order_id AS STRING), '-', CAST(product_id AS STRING))"
         type: string
         primary_key: true
@@ -19,74 +21,90 @@ cubes:
       # ── Keys and identifiers ─────────────────────────────────────────────
 
       - name: order_id
+        title: Order ID
         sql: order_id
         type: number
         description: "Order header identifier."
 
       - name: customer_id
+        title: Customer ID
         sql: customer_id
         type: string
 
       - name: employee_id
+        title: Employee ID
         sql: employee_id
         type: number
 
       - name: shipper_id
+        title: Shipper ID
         sql: shipper_id
         type: number
 
       # ── Descriptive attributes ───────────────────────────────────────────
 
       - name: product_name
+        title: Product
         sql: product_name
         type: string
 
       - name: category_name
+        title: Category
         sql: category_name
         type: string
 
       - name: customer_name
+        title: Customer
         sql: customer_name
         type: string
 
       - name: customer_country
+        title: Customer Country
         sql: customer_country
         type: string
 
       - name: ship_country
+        title: Ship To Country
         sql: ship_country
         type: string
 
       - name: ship_city
+        title: Ship To City
         sql: ship_city
         type: string
 
       - name: shipper_name
+        title: Shipper
         sql: shipper_name
         type: string
 
       - name: employee_full_name
+        title: Sales Rep
         sql: employee_full_name
         type: string
 
       # ── Flags ────────────────────────────────────────────────────────────
 
       - name: is_shipped
+        title: Shipped?
         sql: is_shipped
         type: boolean
 
       - name: is_late
+        title: Late Delivery?
         sql: is_late
         type: boolean
 
       # ── Time dimensions ──────────────────────────────────────────────────
 
       - name: order_date
+        title: Order Date
         sql: order_date
         type: time
         description: "Date the order was placed."
 
       - name: shipped_date
+        title: Ship Date
         sql: shipped_date
         type: time
         description: "Date the order shipped. Null if not yet shipped."
@@ -97,56 +115,66 @@ cubes:
 
       # CFO: Revenue
       - name: net_revenue
+        title: Net Revenue
         sql: net_revenue
         type: sum
         format: currency
         description: "Realized revenue after discounts."
 
       - name: gross_revenue
+        title: Gross Revenue
         sql: gross_revenue
         type: sum
         format: currency
         description: "Revenue before discounts."
 
       - name: discount_amount
+        title: Discount Amount
         sql: discount_amount
         type: sum
         format: currency
         description: "Total revenue given away in discounts."
 
       - name: freight_total
+        title: Freight Total
         sql: freight_amount
         type: sum
         format: currency
         description: "Total freight charges."
 
       - name: order_count
+        title: Orders
         sql: order_id
         type: count_distinct
         description: "Number of unique orders."
 
       - name: customer_count
+        title: Customers
         sql: customer_id
         type: count_distinct
         description: "Number of unique customers."
 
       - name: line_item_count
+        title: Line Items
         type: count
         description: "Total number of order line items."
 
       - name: avg_order_value
+        title: Avg Order Value
         type: number
         sql: "{net_revenue} / NULLIF({order_count}, 0)"
         format: currency
         description: "Average net revenue per order."
 
       - name: discount_rate_pct
+        title: Discount Rate %
         type: number
         sql: "100.0 * {discount_amount} / NULLIF({gross_revenue}, 0)"
         format: percent
         description: "Discount as a percentage of gross revenue."
 
       - name: freight_as_pct_of_revenue
+        title: Freight % of Revenue
         type: number
         sql: "100.0 * {freight_total} / NULLIF({net_revenue}, 0)"
         format: percent
@@ -154,16 +182,19 @@ cubes:
 
       # COO: Fulfillment
       - name: shipped_order_count
+        title: Shipped Orders
         sql: "CASE WHEN is_shipped = true THEN order_id END"
         type: count_distinct
         description: "Number of orders that have shipped."
 
       - name: late_order_count
+        title: Late Orders
         sql: "CASE WHEN is_late = true THEN order_id END"
         type: count_distinct
         description: "Number of orders shipped after the required date."
 
       - name: on_time_delivery_rate
+        title: On-Time Delivery Rate
         type: number
         sql: >
           100.0 * COUNT(DISTINCT CASE WHEN is_shipped = true AND is_late = false
@@ -173,17 +204,20 @@ cubes:
         description: "Percentage of shipped orders delivered on time."
 
       - name: avg_days_to_ship
+        title: Avg Days to Ship
         sql: days_to_ship
         type: avg
         description: "Average days from order placement to shipment."
 
       - name: avg_days_late
+        title: Avg Days Late
         sql: "CASE WHEN is_late = true THEN days_late END"
         type: avg
         description: "Average days late for orders that missed the required date."
 
       # HR: Workforce
       - name: employee_count
+        title: Sales Reps
         sql: employee_id
         type: count_distinct
-        description: "Number of distinct employees with at least one order."
+        description: "Number of distinct sales reps with at least one order."

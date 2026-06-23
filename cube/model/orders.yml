@@ -1,0 +1,374 @@
+cubes:
+  - name: orders
+    sql_table: northwind.marts.fact_order_lines
+    description: >
+      One row per order line item. Primary analytical cube covering revenue,
+      discounts, and fulfillment metrics for the CFO, COO, and HR dashboards.
+
+    # ── Joins ────────────────────────────────────────────────────────────────
+
+    joins:
+      - name: customers
+        sql: "{orders}.customer_key = {customers}.customer_key"
+        relationship: many_to_one
+
+      - name: products
+        sql: "{orders}.product_key = {products}.product_key"
+        relationship: many_to_one
+
+      - name: employees
+        sql: "{orders}.employee_key = {employees}.employee_key"
+        relationship: many_to_one
+
+      - name: order_date
+        sql: "{orders}.order_date_key = {order_date}.date_key"
+        relationship: many_to_one
+
+    # ── Measures ─────────────────────────────────────────────────────────────
+
+    measures:
+
+      # CFO: Revenue
+      - name: net_revenue
+        sql: net_revenue
+        type: sum
+        format: currency
+        description: "Realized revenue after discounts. Primary revenue measure."
+
+      - name: gross_revenue
+        sql: gross_revenue
+        type: sum
+        format: currency
+        description: "Revenue before discounts."
+
+      - name: discount_amount
+        sql: discount_amount
+        type: sum
+        format: currency
+        description: "Total revenue given away in discounts."
+
+      - name: freight_total
+        sql: freight_amount
+        type: sum
+        format: currency
+        description: "Total freight charges across orders."
+
+      - name: order_count
+        sql: order_id
+        type: count_distinct
+        description: "Number of unique orders."
+
+      - name: customer_count
+        sql: customer_id
+        type: count_distinct
+        description: "Number of unique customers with at least one order."
+
+      - name: line_item_count
+        type: count
+        description: "Total number of order line items."
+
+      - name: avg_order_value
+        type: number
+        sql: "{net_revenue} / NULLIF({order_count}, 0)"
+        format: currency
+        description: "Average net revenue per order."
+
+      - name: discount_rate_pct
+        type: number
+        sql: "100.0 * {discount_amount} / NULLIF({gross_revenue}, 0)"
+        format: percent
+        description: "Discount as a percentage of gross revenue."
+
+      - name: freight_as_pct_of_revenue
+        type: number
+        sql: "100.0 * {freight_total} / NULLIF({net_revenue}, 0)"
+        format: percent
+        description: "Freight cost as a percentage of net revenue."
+
+      # COO: Fulfillment
+      - name: shipped_order_count
+        sql: "CASE WHEN is_shipped = true THEN order_id END"
+        type: count_distinct
+        description: "Number of orders that have shipped."
+
+      - name: late_order_count
+        sql: "CASE WHEN is_late = true THEN order_id END"
+        type: count_distinct
+        description: "Number of orders shipped after the required date."
+
+      - name: on_time_delivery_rate
+        type: number
+        sql: >
+          100.0 * (COUNT(DISTINCT CASE WHEN is_shipped = true AND is_late = false
+          THEN order_id END)) / NULLIF(COUNT(DISTINCT CASE WHEN is_shipped = true
+          THEN order_id END), 0)
+        format: percent
+        description: "Percentage of shipped orders delivered on or before required date."
+
+      - name: avg_days_to_ship
+        sql: days_to_ship
+        type: avg
+        description: "Average days from order placement to shipment."
+
+      - name: avg_days_late
+        sql: "CASE WHEN is_late = true THEN days_late END"
+        type: avg
+        description: "Average days late, for orders that missed the required date."
+
+      # HR: Workforce
+      - name: revenue_per_employee
+        type: number
+        sql: "{net_revenue} / NULLIF(COUNT(DISTINCT employee_id), 0)"
+        format: currency
+        description: "Average net revenue generated per sales representative."
+
+    # ── Dimensions ────────────────────────────────────────────────────────────
+
+    dimensions:
+
+      - name: order_id
+        sql: order_id
+        type: number
+        primary_key: false
+        description: "Order identifier."
+
+      - name: product_name
+        sql: product_name
+        type: string
+        description: "Product name (degenerate dimension)."
+
+      - name: category_name
+        sql: category_name
+        type: string
+        description: "Product category name (degenerate dimension)."
+
+      - name: customer_name
+        sql: customer_name
+        type: string
+        description: "Customer company name (degenerate dimension)."
+
+      - name: customer_country
+        sql: customer_country
+        type: string
+        description: "Customer billing country."
+
+      - name: ship_country
+        sql: ship_country
+        type: string
+        description: "Order destination country."
+
+      - name: ship_city
+        sql: ship_city
+        type: string
+        description: "Order destination city."
+
+      - name: shipper_name
+        sql: shipper_name
+        type: string
+        description: "Shipping carrier name (degenerate dimension)."
+
+      - name: employee_full_name
+        sql: employee_full_name
+        type: string
+        description: "Sales representative full name (degenerate dimension)."
+
+      - name: is_shipped
+        sql: is_shipped
+        type: boolean
+        description: "True if the order has shipped."
+
+      - name: is_late
+        sql: is_late
+        type: boolean
+        description: "True if shipped after required date."
+
+      - name: order_date
+        sql: order_date
+        type: time
+        description: "Date the order was placed. Use for time-series analysis."
+
+      - name: shipped_date
+        sql: shipped_date
+        type: time
+        description: "Date the order shipped."
+
+  # ── Customer Dimension ───────────────────────────────────────────────────────
+
+  - name: customers
+    sql_table: northwind.marts.dim_customers
+    description: "One row per customer."
+
+    dimensions:
+      - name: customer_key
+        sql: customer_key
+        type: string
+        primary_key: true
+
+      - name: customer_id
+        sql: customer_id
+        type: string
+
+      - name: company_name
+        sql: company_name
+        type: string
+
+      - name: contact_name
+        sql: contact_name
+        type: string
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: city
+        sql: city
+        type: string
+
+      - name: region
+        sql: region
+        type: string
+
+  # ── Product Dimension ────────────────────────────────────────────────────────
+
+  - name: products
+    sql_table: northwind.marts.dim_products
+    description: "One row per product with category and supplier attributes."
+
+    dimensions:
+      - name: product_key
+        sql: product_key
+        type: string
+        primary_key: true
+
+      - name: product_id
+        sql: product_id
+        type: number
+
+      - name: product_name
+        sql: product_name
+        type: string
+
+      - name: category_name
+        sql: category_name
+        type: string
+
+      - name: supplier_name
+        sql: supplier_name
+        type: string
+
+      - name: supplier_country
+        sql: supplier_country
+        type: string
+
+      - name: unit_price
+        sql: unit_price
+        type: number
+
+      - name: is_discontinued
+        sql: is_discontinued
+        type: boolean
+
+  # ── Employee Dimension ───────────────────────────────────────────────────────
+
+  - name: employees
+    sql_table: northwind.marts.dim_employees
+    description: "One row per employee / sales representative."
+
+    measures:
+      - name: employee_count
+        type: count
+        description: "Total number of employees."
+
+    dimensions:
+      - name: employee_key
+        sql: employee_key
+        type: string
+        primary_key: true
+
+      - name: employee_id
+        sql: employee_id
+        type: number
+
+      - name: full_name
+        sql: full_name
+        type: string
+
+      - name: job_title
+        sql: job_title
+        type: string
+
+      - name: hire_date
+        sql: hire_date
+        type: time
+
+      - name: birth_date
+        sql: birth_date
+        type: time
+
+      - name: city
+        sql: city
+        type: string
+
+      - name: country
+        sql: country
+        type: string
+
+      - name: territory_count
+        sql: territory_count
+        type: number
+
+      - name: reports_to_employee_id
+        sql: reports_to_employee_id
+        type: number
+
+  # ── Date Dimension ───────────────────────────────────────────────────────────
+
+  - name: order_date
+    sql_table: northwind.marts.dim_date
+    description: "Date dimension. Join to orders on date_key = order_date_key."
+
+    dimensions:
+      - name: date_key
+        sql: date_key
+        type: number
+        primary_key: true
+
+      - name: calendar_date
+        sql: calendar_date
+        type: time
+
+      - name: year
+        sql: year
+        type: number
+
+      - name: quarter
+        sql: quarter
+        type: number
+
+      - name: year_quarter
+        sql: year_quarter
+        type: string
+
+      - name: month_number
+        sql: month_number
+        type: number
+
+      - name: month_name
+        sql: month_name
+        type: string
+
+      - name: year_month
+        sql: year_month
+        type: string
+
+      - name: week_of_year
+        sql: week_of_year
+        type: number
+
+      - name: day_name
+        sql: day_name
+        type: string
+
+      - name: is_weekend
+        sql: is_weekend
+        type: boolean

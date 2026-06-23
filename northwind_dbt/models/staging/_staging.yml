@@ -1,0 +1,149 @@
+version: 2
+
+models:
+  - name: stg_orders
+    description: "One row per order header. Cleaned and renamed from northwind.raw.orders."
+    columns:
+      - name: order_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "FK to stg_customers."
+        tests:
+          - not_null
+      - name: employee_id
+        description: "FK to stg_employees."
+        tests:
+          - not_null
+      - name: shipper_id
+        description: "FK to stg_shippers."
+      - name: order_date
+        description: "Date the order was placed."
+        tests:
+          - not_null
+      - name: required_date
+        description: "Date the customer requested delivery."
+      - name: shipped_date
+        description: "Date the order actually shipped. Null if not yet shipped."
+      - name: freight_amount
+        description: "Freight cost in USD."
+
+  - name: stg_order_details
+    description: "One row per order line item. Cleaned and renamed from northwind.raw.order_details."
+    columns:
+      - name: order_id
+        description: "FK to stg_orders."
+        tests:
+          - not_null
+      - name: product_id
+        description: "FK to stg_products."
+        tests:
+          - not_null
+      - name: unit_price
+        description: "Price per unit at time of order (may differ from current product price)."
+        tests:
+          - not_null
+      - name: quantity
+        description: "Units ordered."
+        tests:
+          - not_null
+      - name: discount_rate
+        description: "Discount applied as a decimal (0.05 = 5%). Zero means no discount."
+        tests:
+          - not_null
+
+  - name: stg_customers
+    description: "One row per customer company. Cleaned and renamed from northwind.raw.customers."
+    columns:
+      - name: customer_id
+        description: "Primary key — 5-character customer code."
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_products
+    description: "One row per product. Cleaned and renamed from northwind.raw.products."
+    columns:
+      - name: product_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+      - name: is_discontinued
+        description: "True if the product is no longer sold."
+        tests:
+          - not_null
+
+  - name: stg_categories
+    description: "Product category lookup. Cleaned and renamed from northwind.raw.categories."
+    columns:
+      - name: category_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_suppliers
+    description: "One row per product supplier. Cleaned and renamed from northwind.raw.suppliers."
+    columns:
+      - name: supplier_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_employees
+    description: "One row per employee. Cleaned and renamed from northwind.raw.employees."
+    columns:
+      - name: employee_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+      - name: reports_to_employee_id
+        description: "Self-referencing FK to employee_id of this employee's manager. Null for top-level employees."
+
+  - name: stg_employee_territories
+    description: "Bridge table — employee to territory assignments. One row per assignment."
+    columns:
+      - name: employee_id
+        description: "FK to stg_employees."
+        tests:
+          - not_null
+      - name: territory_id
+        description: "FK to stg_territories."
+        tests:
+          - not_null
+
+  - name: stg_territories
+    description: "Sales territory lookup. Cleaned and renamed from northwind.raw.territories."
+    columns:
+      - name: territory_id
+        description: "Primary key — alphanumeric zip-code-based ID."
+        tests:
+          - not_null
+          - unique
+      - name: region_id
+        description: "FK to stg_region."
+        tests:
+          - not_null
+
+  - name: stg_region
+    description: "Geographic region lookup. Four regions: Eastern, Western, Northern, Southern."
+    columns:
+      - name: region_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique
+
+  - name: stg_shippers
+    description: "Shipping carrier lookup. Cleaned and renamed from northwind.raw.shippers."
+    columns:
+      - name: shipper_id
+        description: "Primary key."
+        tests:
+          - not_null
+          - unique

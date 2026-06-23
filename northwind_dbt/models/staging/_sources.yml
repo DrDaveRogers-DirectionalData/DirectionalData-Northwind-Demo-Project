@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: northwind_raw
+    description: "Raw Northwind Traders tables ingested from Azure SQL Database via JDBC into Databricks Unity Catalog."
+    database: northwind
+    schema: raw
+    tables:
+      - name: orders
+        description: "One row per customer order header."
+      - name: order_details
+        description: "One row per line item — each product within an order."
+      - name: customers
+        description: "One row per customer company."
+      - name: products
+        description: "One row per product sold."
+      - name: categories
+        description: "Product category lookup."
+      - name: suppliers
+        description: "One row per product supplier."
+      - name: employees
+        description: "One row per employee / sales representative."
+      - name: employee_territories
+        identifier: employeeterritories
+        description: "Bridge table — employee to territory assignments."
+      - name: territories
+        description: "Sales territory lookup."
+      - name: region
+        description: "Geographic region lookup."
+      - name: shippers
+        description: "Shipping carrier lookup."

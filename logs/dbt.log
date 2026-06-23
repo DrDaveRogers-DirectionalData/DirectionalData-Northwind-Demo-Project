@@ -1,0 +1,32 @@
+[0m17:37:13.616243 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'start', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF978371F0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF98B0D370>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF98B0D0D0>]}
+
+
+============================== 17:37:13.627840 | e60d9cb1-427b-472d-be72-189a6dacfde1 ==============================
+[0m17:37:13.627840 [info ] [MainThread]: Running with dbt=1.10.19
+[0m17:37:13.627840 [debug] [MainThread]: running dbt with arguments {'fail_fast': 'False', 'debug': 'False', 'log_cache_events': 'False', 'send_anonymous_usage_stats': 'True', 'warn_error_options': 'WarnErrorOptionsV2(error=[], warn=[], silence=[])', 'cache_selected_only': 'False', 'no_print': 'None', 'target_path': 'None', 'version_check': 'True', 'empty': 'None', 'printer_width': '80', 'quiet': 'False', 'introspect': 'True', 'log_path': 'logs', 'warn_error': 'None', 'write_json': 'True', 'invocation_command': 'dbt init northwind_dbt', 'log_format': 'default', 'partial_parse': 'True', 'static_parser': 'True', 'profiles_dir': 'C:\\Users\\daver\\.dbt', 'use_experimental_parser': 'False', 'use_colors': 'True', 'indirect_selection': 'eager'}
+[0m17:37:13.660314 [debug] [MainThread]: Starter project path: C:\Users\daver\AppData\Local\Programs\Python\Python39\lib\site-packages\dbt\include\starter_project
+[0m17:37:13.688426 [info ] [MainThread]: 
+Your new dbt project "northwind_dbt" was created!
+
+For more information on how to configure the profiles.yml file,
+please consult the dbt documentation here:
+
+  https://docs.getdbt.com/docs/configure-your-profile
+
+One more thing:
+
+Need help? Don't hesitate to reach out to us via GitHub issues or on Slack:
+
+  https://community.getdbt.com/
+
+Happy modeling!
+
+[0m17:37:13.689443 [info ] [MainThread]: Setting up your profile.
+[0m17:37:41.314902 [debug] [MainThread]: Spark adapter: Setting pyhive.hive logging to ERROR
+[0m17:37:41.314902 [debug] [MainThread]: Spark adapter: Setting thrift.transport logging to ERROR
+[0m17:37:41.315999 [debug] [MainThread]: Spark adapter: Setting thrift.protocol logging to ERROR
+[0m17:39:15.421788 [info ] [MainThread]: Profile northwind_dbt written to C:\Users\daver\.dbt\profiles.yml using target's profile_template.yml and your supplied values. Run 'dbt debug' to validate the connection.
+[0m17:39:15.421788 [debug] [MainThread]: Command `dbt init` succeeded at 17:39:15.421788 after 122.00 seconds
+[0m17:39:15.421788 [debug] [MainThread]: Sending event: {'category': 'dbt', 'action': 'invocation', 'label': 'end', 'context': [<snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF978371F0>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF98B0D430>, <snowplow_tracker.self_describing_json.SelfDescribingJson object at 0x000001EF98B0D940>]}
+[0m17:39:15.421788 [debug] [MainThread]: Flushing usage events
+[0m17:39:16.142254 [debug] [MainThread]: An error was encountered while trying to flush usage events

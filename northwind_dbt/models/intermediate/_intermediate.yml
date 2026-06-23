@@ -1,0 +1,57 @@
+version: 2
+
+models:
+  - name: int_order_lines_enriched
+    description: >
+      One row per order line item with all dimensional attributes denormalized.
+      Joins stg_order_details to orders, products, categories, customers, employees,
+      and shippers. Calculates gross_revenue, discount_amount, net_revenue,
+      days_to_ship, and days_late. Primary input for fact_order_lines.
+    columns:
+      - name: order_id
+        description: "FK to stg_orders."
+        tests:
+          - not_null
+      - name: product_id
+        description: "FK to stg_products."
+        tests:
+          - not_null
+      - name: gross_revenue
+        description: "unit_price x quantity before discount."
+        tests:
+          - not_null
+      - name: discount_amount
+        description: "Revenue given away in discounts: unit_price x quantity x discount_rate."
+        tests:
+          - not_null
+      - name: net_revenue
+        description: "Realized revenue after discount: unit_price x quantity x (1 - discount_rate)."
+        tests:
+          - not_null
+      - name: is_shipped
+        description: "True if the order has a shipped_date."
+        tests:
+          - not_null
+      - name: is_late
+        description: "True if shipped_date is after required_date."
+        tests:
+          - not_null
+
+  - name: int_employee_territories
+    description: >
+      One row per employee-territory assignment with territory description and
+      region joined in. Flattens the employee_territories bridge table for use
+      in dim_employees territory aggregations.
+    columns:
+      - name: employee_id
+        description: "FK to stg_employees."
+        tests:
+          - not_null
+      - name: territory_id
+        description: "FK to stg_territories."
+        tests:
+          - not_null
+      - name: region_id
+        description: "FK to stg_region."
+        tests:
+          - not_null

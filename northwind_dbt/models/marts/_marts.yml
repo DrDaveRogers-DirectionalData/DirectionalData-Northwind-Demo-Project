@@ -1,0 +1,169 @@
+version: 2
+
+models:
+  - name: dim_customers
+    description: "One row per customer. Sourced from stg_customers. customer_key is an md5 surrogate key."
+    columns:
+      - name: customer_key
+        description: "Surrogate key (md5 of customer_id)."
+        tests:
+          - not_null
+          - unique
+      - name: customer_id
+        description: "Natural key — 5-character customer code from source."
+        tests:
+          - not_null
+          - unique
+      - name: company_name
+        tests:
+          - not_null
+      - name: country
+        tests:
+          - not_null
+
+  - name: dim_products
+    description: "One row per product with category and supplier attributes denormalized."
+    columns:
+      - name: product_key
+        description: "Surrogate key (md5 of product_id)."
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: "Natural key."
+        tests:
+          - not_null
+          - unique
+      - name: product_name
+        tests:
+          - not_null
+      - name: category_name
+        tests:
+          - not_null
+      - name: is_discontinued
+        tests:
+          - not_null
+
+  - name: dim_employees
+    description: >
+      One row per employee with territory and region assignments aggregated into
+      arrays. territory_list and region_list are Spark array columns — flatten
+      with explode() if row-level territory grain is needed.
+    columns:
+      - name: employee_key
+        description: "Surrogate key (md5 of employee_id)."
+        tests:
+          - not_null
+          - unique
+      - name: employee_id
+        description: "Natural key."
+        tests:
+          - not_null
+          - unique
+      - name: full_name
+        description: "first_name || ' ' || last_name."
+        tests:
+          - not_null
+      - name: hire_date
+        tests:
+          - not_null
+      - name: territory_count
+        description: "Number of territories assigned to this employee. 0 if none."
+        tests:
+          - not_null
+
+  - name: dim_date
+    description: >
+      Generated date spine from 1996-01-01 to 2000-12-31. No source table.
+      date_key is an integer in YYYYMMDD format for easy filtering in SQL and BI tools.
+    columns:
+      - name: date_key
+        description: "Surrogate key — integer YYYYMMDD (e.g., 19970704)."
+        tests:
+          - not_null
+          - unique
+      - name: calendar_date
+        description: "The actual date value."
+        tests:
+          - not_null
+          - unique
+      - name: is_weekend
+        description: "True if Saturday or Sunday."
+        tests:
+          - not_null
+
+  - name: fact_order_lines
+    description: >
+      One row per order line item. The primary analytical fact table. References
+      surrogate keys from dim_customers, dim_products, dim_employees, and dim_date.
+      Contains all revenue, discount, and fulfillment measures needed for CFO and COO dashboards.
+    columns:
+      - name: order_id
+        description: "Natural key — order header identifier."
+        tests:
+          - not_null
+      - name: product_id
+        description: "Natural key — product identifier."
+        tests:
+          - not_null
+      - name: customer_key
+        description: "FK to dim_customers.customer_key."
+        tests:
+          - not_null
+      - name: product_key
+        description: "FK to dim_products.product_key."
+        tests:
+          - not_null
+      - name: order_date_key
+        description: "FK to dim_date.date_key (YYYYMMDD integer)."
+        tests:
+          - not_null
+      - name: gross_revenue
+        description: "unit_price x quantity before discount."
+        tests:
+          - not_null
+      - name: net_revenue
+        description: "Realized revenue after discount."
+        tests:
+          - not_null
+      - name: is_shipped
+        description: "True if the order has a shipped_date."
+        tests:
+          - not_null
+      - name: is_late
+        description: "True if shipped_date is after required_date."
+        tests:
+          - not_null
+
+  - name: fact_inventory_snapshot
+    description: >
+      Point-in-time snapshot of product inventory as loaded from the Azure SQL source.
+      One row per product. Used for COO inventory health metrics including out-of-stock
+      and below-reorder-level flags.
+    columns:
+      - name: product_key
+        description: "FK to dim_products.product_key."
+        tests:
+          - not_null
+          - unique
+      - name: product_id
+        description: "Natural key."
+        tests:
+          - not_null
+          - unique
+      - name: units_in_stock
+        description: "Current units on hand."
+        tests:
+          - not_null
+      - name: inventory_value
+        description: "units_in_stock x unit_price."
+        tests:
+          - not_null
+      - name: is_out_of_stock
+        description: "True if units_in_stock = 0 and product is not discontinued."
+        tests:
+          - not_null
+      - name: is_below_reorder_level
+        description: "True if units_in_stock <= reorder_level."
+        tests:
+          - not_null

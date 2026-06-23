@@ -5,15 +5,6 @@ cubes:
       One row per order line item. Primary analytical cube covering revenue,
       discounts, and fulfillment metrics for the CFO, COO, and HR dashboards.
 
-    # ── Primary Key ──────────────────────────────────────────────────────────
-
-    dimensions:
-      - name: order_line_key
-        sql: "CONCAT(CAST(order_id AS STRING), '-', CAST(product_id AS STRING))"
-        type: string
-        primary_key: true
-        description: "Surrogate primary key: order_id + product_id concatenated."
-
     # ── Joins ────────────────────────────────────────────────────────────────
 
     joins:
@@ -134,6 +125,12 @@ cubes:
     # ── Dimensions ────────────────────────────────────────────────────────────
 
     dimensions:
+
+      - name: order_line_key
+        sql: "CONCAT(CAST(order_id AS STRING), '-', CAST(product_id AS STRING))"
+        type: string
+        primary_key: true
+        description: "Surrogate primary key: order_id + product_id concatenated."
 
       - name: order_id
         sql: order_id

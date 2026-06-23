@@ -13,11 +13,19 @@ as reusable Cube measures consumed by both Tableau and Power BI.
 
 ## Step 1: Create a Cube Cloud Account
 
-1. Go to [app.cube.dev](https://app.cube.dev) and sign up for free (no credit card required).
-2. Click **Create Deployment** and choose **Cube Cloud**.
-3. Name it `northwind-demo`.
+1. Go to [cubecloud.dev](https://cubecloud.dev/auth/signup) and sign up for free (no credit card required).
+2. Click **Create Deployment**, name it `northwind-demo`, and select **AWS / US East (Ohio)** to match the Databricks Free Edition workspace region.
 
-## Step 2: Connect to Databricks
+## Step 2: Set Up the Cube Project
+
+On the **Set Up Cube Project** screen, choose **Import from a GitHub repository**.
+
+1. Authorize Cube Cloud to access your GitHub account when prompted.
+2. Select the `DirectionalData Northwind Demo Project` repository.
+3. Set the **Model path** to `cube/model`.
+4. Click **Next**. Cube Cloud will pull `orders.yml` and `inventory.yml` automatically and sync on every future push.
+
+## Step 3: Connect to Databricks
 
 When prompted for a data source, choose **Databricks** and enter:
 
@@ -30,21 +38,6 @@ When prompted for a data source, choose **Databricks** and enter:
 | Schema | `marts` |
 
 Click **Test Connection** to confirm, then **Next**.
-
-## Step 3: Upload the Data Model
-
-Cube Cloud offers two options:
-
-**Option A — Git Sync (recommended for portfolio):**
-1. In Cube Cloud, go to **Settings > Git Integration**.
-2. Connect your GitHub account and select the `DirectionalData Northwind Demo Project` repo.
-3. Set the **Model path** to `cube/model`.
-4. Cube Cloud will pull the YAML files automatically and sync on every push.
-
-**Option B — Manual upload:**
-1. In Cube Cloud, open the **Data Model** editor.
-2. Create two new files: `orders.yml` and `inventory.yml`.
-3. Paste the contents of each file from this repo's `cube/model/` folder.
 
 ## Step 4: Validate the Model in Playground
 

@@ -88,6 +88,13 @@ metrics:
     type_params:
       measure: shipped_orders
 
+  - name: on_time_delivered_order_count
+    label: "On-Time Delivered Orders"
+    description: "Count of orders shipped on or before the required date"
+    type: simple
+    type_params:
+      measure: on_time_delivered_orders
+
   - name: late_order_count
     label: "Late Orders"
     description: "Number of orders shipped after the required date"
@@ -107,5 +114,5 @@ metrics:
     description: "Percentage of shipped orders delivered on or before the required date"
     type: ratio
     type_params:
-      numerator: on_time_delivered_orders
-      denominator: shipped_orders
+      numerator: on_time_delivered_order_count
+      denominator: shipped_order_count

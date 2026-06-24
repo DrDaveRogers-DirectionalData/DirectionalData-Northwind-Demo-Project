@@ -151,6 +151,10 @@ models:
         tests:
           - not_null
           - unique
+      - name: snapshot_date
+        description: "Date the inventory snapshot was taken (current_date at load time)."
+        tests:
+          - not_null
       - name: units_in_stock
         description: "Current units on hand."
         tests:

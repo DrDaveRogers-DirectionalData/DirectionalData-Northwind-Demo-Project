@@ -1,0 +1,160 @@
+semantic_models:
+  - name: fact_order_lines
+    description: >
+      One row per order line item. All dimensions are denormalized into this table.
+      Serves CFO revenue, COO fulfillment, and HR workforce metrics.
+    model: ref('fact_order_lines')
+
+    # ── Primary Entity ────────────────────────────────────────────────────────
+    entities:
+      - name: order_line
+        type: primary
+        label: "Order Line"
+        expr: "concat(cast(order_id as string), '-', cast(product_id as string))"
+
+    # ── Dimensions ────────────────────────────────────────────────────────────
+    dimensions:
+
+      # Time dimensions
+      - name: order_date
+        type: time
+        label: "Order Date"
+        type_params:
+          time_granularity: day
+        expr: order_date
+
+      - name: shipped_date
+        type: time
+        label: "Ship Date"
+        type_params:
+          time_granularity: day
+        expr: shipped_date
+
+      # Categorical dimensions
+      - name: product_name
+        type: categorical
+        label: "Product"
+        expr: product_name
+
+      - name: category_name
+        type: categorical
+        label: "Category"
+        expr: category_name
+
+      - name: customer_name
+        type: categorical
+        label: "Customer"
+        expr: customer_name
+
+      - name: customer_country
+        type: categorical
+        label: "Customer Country"
+        expr: customer_country
+
+      - name: ship_country
+        type: categorical
+        label: "Ship To Country"
+        expr: ship_country
+
+      - name: shipper_name
+        type: categorical
+        label: "Shipper"
+        expr: shipper_name
+
+      - name: employee_full_name
+        type: categorical
+        label: "Sales Rep"
+        expr: employee_full_name
+
+      - name: is_shipped
+        type: categorical
+        label: "Shipped?"
+        expr: "case when is_shipped then 'Yes' else 'No' end"
+
+      - name: is_late
+        type: categorical
+        label: "Late Delivery?"
+        expr: "case when is_late then 'Yes' else 'No' end"
+
+    # ── Measures ──────────────────────────────────────────────────────────────
+    measures:
+
+      # CFO: Revenue
+      - name: net_revenue
+        label: "Net Revenue"
+        description: "Realized revenue after discounts"
+        agg: sum
+        expr: net_revenue
+        agg_time_dimension: order_date
+
+      - name: gross_revenue
+        label: "Gross Revenue"
+        description: "Revenue before discounts"
+        agg: sum
+        expr: gross_revenue
+        agg_time_dimension: order_date
+
+      - name: discount_amount
+        label: "Discount Amount"
+        description: "Total discount given"
+        agg: sum
+        expr: discount_amount
+        agg_time_dimension: order_date
+
+      - name: freight_amount
+        label: "Freight Total"
+        description: "Total freight charges"
+        agg: sum
+        expr: freight_amount
+        agg_time_dimension: order_date
+
+      # Volume
+      - name: distinct_orders
+        label: "Orders"
+        description: "Count of unique orders"
+        agg: count_distinct
+        expr: order_id
+        agg_time_dimension: order_date
+
+      - name: distinct_customers
+        label: "Customers"
+        description: "Count of unique customers with at least one order"
+        agg: count_distinct
+        expr: customer_id
+        agg_time_dimension: order_date
+
+      - name: distinct_employees
+        label: "Sales Reps"
+        description: "Count of unique sales reps with at least one order"
+        agg: count_distinct
+        expr: employee_id
+        agg_time_dimension: order_date
+
+      # COO: Fulfillment
+      - name: avg_days_to_ship
+        label: "Avg Days to Ship"
+        description: "Average days from order placement to shipment"
+        agg: average
+        expr: days_to_ship
+        agg_time_dimension: order_date
+
+      - name: shipped_orders
+        label: "Shipped Orders"
+        description: "Count of distinct orders that have shipped"
+        agg: count_distinct
+        expr: "case when is_shipped then order_id end"
+        agg_time_dimension: order_date
+
+      - name: on_time_delivered_orders
+        label: "On-Time Delivered Orders"
+        description: "Count of orders shipped on or before the required date"
+        agg: count_distinct
+        expr: "case when is_shipped and not is_late then order_id end"
+        agg_time_dimension: order_date
+
+      - name: late_orders
+        label: "Late Orders"
+        description: "Count of orders shipped after the required date"
+        agg: count_distinct
+        expr: "case when is_late then order_id end"
+        agg_time_dimension: order_date

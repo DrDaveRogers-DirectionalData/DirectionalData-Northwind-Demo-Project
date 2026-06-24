@@ -1,0 +1,60 @@
+metrics:
+
+  # ── COO: Inventory Health ─────────────────────────────────────────────────────
+
+  - name: total_products
+    label: "Total Products"
+    description: "Total number of products in the catalog"
+    type: simple
+    type_params:
+      measure: total_products
+
+  - name: active_products
+    label: "Active Products"
+    description: "Products that are not discontinued"
+    type: simple
+    type_params:
+      measure: active_products
+
+  - name: out_of_stock_count
+    label: "Out of Stock Products"
+    description: "Active products with zero units in stock"
+    type: simple
+    type_params:
+      measure: out_of_stock_products
+
+  - name: below_reorder_count
+    label: "Below Reorder Level"
+    description: "Products at or below their reorder threshold"
+    type: simple
+    type_params:
+      measure: below_reorder_products
+
+  - name: total_inventory_value
+    label: "Total Inventory Value"
+    description: "Total value of on-hand inventory"
+    type: simple
+    type_params:
+      measure: total_inventory_value
+
+  - name: total_units_in_stock
+    label: "Total Units in Stock"
+    description: "Total units across all products currently in stock"
+    type: simple
+    type_params:
+      measure: total_units_in_stock
+
+  - name: total_units_on_order
+    label: "Total Units on Order"
+    description: "Total units currently on order from suppliers"
+    type: simple
+    type_params:
+      measure: total_units_on_order
+
+  - name: out_of_stock_rate
+    label: "Out of Stock Rate"
+    description: "Percentage of active products currently out of stock"
+    type: ratio
+    type_params:
+      numerator: out_of_stock_count
+      denominator: active_products

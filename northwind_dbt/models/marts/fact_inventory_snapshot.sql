@@ -28,6 +28,9 @@ final as (
         pr.reorder_level,
         round(pr.units_in_stock * pr.unit_price, 2) as inventory_value,
 
+        -- snapshot date (required for MetricFlow agg_time_dimension)
+        current_date()                               as snapshot_date,
+
         -- derived inventory flags
         pr.is_discontinued,
         case when pr.units_in_stock = 0 and not pr.is_discontinued

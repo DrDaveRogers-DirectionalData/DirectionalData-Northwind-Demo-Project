@@ -1,0 +1,111 @@
+metrics:
+
+  # ── CFO: Revenue ─────────────────────────────────────────────────────────────
+
+  - name: net_revenue
+    label: "Net Revenue"
+    description: "Total realized revenue after discounts"
+    type: simple
+    type_params:
+      measure: net_revenue
+
+  - name: gross_revenue
+    label: "Gross Revenue"
+    description: "Total revenue before discounts"
+    type: simple
+    type_params:
+      measure: gross_revenue
+
+  - name: discount_amount
+    label: "Discount Amount"
+    description: "Total revenue given away in discounts"
+    type: simple
+    type_params:
+      measure: discount_amount
+
+  - name: freight_total
+    label: "Freight Total"
+    description: "Total freight charges collected"
+    type: simple
+    type_params:
+      measure: freight_amount
+
+  # ── Volume ────────────────────────────────────────────────────────────────────
+
+  - name: order_count
+    label: "Orders"
+    description: "Number of unique orders"
+    type: simple
+    type_params:
+      measure: distinct_orders
+
+  - name: customer_count
+    label: "Customers"
+    description: "Number of unique customers who placed an order"
+    type: simple
+    type_params:
+      measure: distinct_customers
+
+  - name: employee_count
+    label: "Sales Reps"
+    description: "Number of sales reps with at least one order"
+    type: simple
+    type_params:
+      measure: distinct_employees
+
+  # ── CFO: Computed ─────────────────────────────────────────────────────────────
+
+  - name: avg_order_value
+    label: "Avg Order Value"
+    description: "Average net revenue per order"
+    type: ratio
+    type_params:
+      numerator: net_revenue
+      denominator: order_count
+
+  - name: discount_rate
+    label: "Discount Rate"
+    description: "Discount as a percentage of gross revenue"
+    type: ratio
+    type_params:
+      numerator: discount_amount
+      denominator: gross_revenue
+
+  - name: freight_pct_of_revenue
+    label: "Freight % of Revenue"
+    description: "Freight cost as a percentage of net revenue"
+    type: ratio
+    type_params:
+      numerator: freight_total
+      denominator: net_revenue
+
+  # ── COO: Fulfillment ──────────────────────────────────────────────────────────
+
+  - name: shipped_order_count
+    label: "Shipped Orders"
+    description: "Number of orders that have shipped"
+    type: simple
+    type_params:
+      measure: shipped_orders
+
+  - name: late_order_count
+    label: "Late Orders"
+    description: "Number of orders shipped after the required date"
+    type: simple
+    type_params:
+      measure: late_orders
+
+  - name: avg_days_to_ship_metric
+    label: "Avg Days to Ship"
+    description: "Average days from order placement to shipment"
+    type: simple
+    type_params:
+      measure: avg_days_to_ship
+
+  - name: on_time_delivery_rate
+    label: "On-Time Delivery Rate"
+    description: "Percentage of shipped orders delivered on or before the required date"
+    type: ratio
+    type_params:
+      numerator: on_time_delivered_orders
+      denominator: shipped_orders

@@ -1,0 +1,97 @@
+semantic_models:
+  - name: fact_inventory_snapshot
+    description: >
+      Point-in-time product inventory snapshot. One row per product.
+      Used for COO inventory health metrics.
+    model: ref('fact_inventory_snapshot')
+
+    # ── Primary Entity ────────────────────────────────────────────────────────
+    entities:
+      - name: product
+        type: primary
+        label: "Product"
+        expr: product_id
+
+    # ── Dimensions ────────────────────────────────────────────────────────────
+    dimensions:
+
+      # Time dimension (required for MetricFlow agg_time_dimension)
+      - name: snapshot_date
+        type: time
+        label: "Snapshot Date"
+        type_params:
+          time_granularity: day
+        expr: snapshot_date
+
+      # Categorical dimensions
+      - name: product_name
+        type: categorical
+        label: "Product"
+        expr: product_name
+
+      - name: is_discontinued
+        type: categorical
+        label: "Discontinued?"
+        expr: "case when is_discontinued then 'Yes' else 'No' end"
+
+      - name: is_out_of_stock
+        type: categorical
+        label: "Out of Stock?"
+        expr: "case when is_out_of_stock then 'Yes' else 'No' end"
+
+      - name: is_below_reorder_level
+        type: categorical
+        label: "Below Reorder Level?"
+        expr: "case when is_below_reorder_level then 'Yes' else 'No' end"
+
+    # ── Measures ──────────────────────────────────────────────────────────────
+    measures:
+
+      - name: total_products
+        label: "Total Products"
+        description: "Total number of products"
+        agg: count_distinct
+        expr: product_id
+        agg_time_dimension: snapshot_date
+
+      - name: active_products
+        label: "Active Products"
+        description: "Non-discontinued products"
+        agg: count_distinct
+        expr: "case when not is_discontinued then product_id end"
+        agg_time_dimension: snapshot_date
+
+      - name: out_of_stock_products
+        label: "Out of Stock Products"
+        description: "Active products with zero units in stock"
+        agg: count_distinct
+        expr: "case when is_out_of_stock then product_id end"
+        agg_time_dimension: snapshot_date
+
+      - name: below_reorder_products
+        label: "Below Reorder Level"
+        description: "Products at or below their reorder threshold"
+        agg: count_distinct
+        expr: "case when is_below_reorder_level then product_id end"
+        agg_time_dimension: snapshot_date
+
+      - name: total_units_in_stock
+        label: "Total Units in Stock"
+        description: "Total units across all products currently in stock"
+        agg: sum
+        expr: units_in_stock
+        agg_time_dimension: snapshot_date
+
+      - name: total_units_on_order
+        label: "Total Units on Order"
+        description: "Total units currently on order from suppliers"
+        agg: sum
+        expr: units_on_order
+        agg_time_dimension: snapshot_date
+
+      - name: total_inventory_value
+        label: "Total Inventory Value"
+        description: "Total value of on-hand inventory (units_in_stock x unit_price)"
+        agg: sum
+        expr: inventory_value
+        agg_time_dimension: snapshot_date

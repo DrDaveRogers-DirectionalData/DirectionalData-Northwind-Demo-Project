@@ -1,6 +1,14 @@
 version: 2
 
 models:
+  - name: metricflow_time_spine
+    description: "MetricFlow time spine — required for the dbt Semantic Layer. Sourced from dim_date."
+    time_spine:
+      standard_granularity_column: date_day
+    columns:
+      - name: date_day
+        granularity: day
+
   - name: dim_customers
     description: "One row per customer. Sourced from stg_customers. customer_key is an md5 surrogate key."
     columns:
